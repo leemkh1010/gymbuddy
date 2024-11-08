@@ -5,6 +5,8 @@ import { UIMatch, useLoaderData } from "@remix-run/react";
 import React from "react";
 import { Handle } from "~/utils/hook";
 import { AreaChart } from '@mantine/charts';
+import InformationPanel from "./InformationPanel";
+import DataPanel from "./DataPanel";
 
 export const handle: Handle = {
   breadcrumb: (match: UIMatch) => {
@@ -12,9 +14,13 @@ export const handle: Handle = {
   }
 }
 
+export type Loader = {
+  id?: string;
+}
+
 export const loader = async ({
   params
-}: LoaderFunctionArgs) => {
+}: LoaderFunctionArgs): Promise<Loader> => {
   return { id: params.id };
 }
 
@@ -59,7 +65,7 @@ export const data = [
 export default function ExercisesId() {
   const [isEditing, setIsEditing] = React.useState(false);
   const [loadingVisible, { toggle }] = useDisclosure(false);
-  const { id } = useLoaderData<typeof loader>();
+  const rootData = useLoaderData<typeof loader>();
 
   return (
     <Box pos="relative">
@@ -69,31 +75,13 @@ export default function ExercisesId() {
             <Tabs.Tab value={GalleryType.Info}>Information</Tabs.Tab>
             <Tabs.Tab value={GalleryType.Data}>Data</Tabs.Tab>
           </Tabs.List>
-          <Tabs.Panel value={GalleryType.Data}>
-            <AreaChart
-              h={300}
-              data={data}
-              dataKey="date"
-              series={[
-                { name: 'Apples', color: 'indigo.6' },
-                { name: 'Oranges', color: 'blue.6' },
-                { name: 'Tomatoes', color: 'teal.6' },
-              ]}
-              curveType="linear"
-            />
-          </Tabs.Panel>
           <Tabs.Panel value={GalleryType.Info}>
-            <LoadingOverlay visible={loadingVisible} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
-            <Group justify="flex-end" align="end">
-              <Button color="red">Delete</Button>
-              <Button onClick={() => {
-                setIsEditing(!isEditing)
-                toggle()
-              }}>{isEditing ? "Save" : "Edit"}</Button>
-            </Group>
-            <div>
-              <h1>Exercise ID: {id}</h1>
-            </div>
+            <InformationPanel />
+          </Tabs.Panel>
+          <Tabs.Panel value={GalleryType.Data}>
+            <DataPanel
+              rootData={rootData}
+            />
           </Tabs.Panel>
         </Stack>
       </Tabs>

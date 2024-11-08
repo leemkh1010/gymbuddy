@@ -1,5 +1,7 @@
 import '@mantine/core/styles.css';
 import '@mantine/charts/styles.css';
+import '@mantine/dates/styles.css';
+import '@mantine/notifications/styles.css';
 
 import {
   Links,
@@ -11,6 +13,7 @@ import {
 import type { LinksFunction } from "@remix-run/node";
 
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -36,7 +39,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider>{children}</MantineProvider>
+        <MantineProvider>
+          {children}
+          <Notifications position="bottom-center" />
+        </MantineProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

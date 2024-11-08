@@ -7,19 +7,22 @@ import ClientForm from "./ClientForm";
 import { IconSearch } from "@tabler/icons-react";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
+  const users = await fetch('http://localhost:10000/api/users');
+
+  const data = await users.json();
+
   return {
-    client: {
-      id: params.id,
-    }
+    clients: data.users as Client[],
   }
 };
 
-type Client = {
+export type Client = {
   id: string;
   name: string;
   email: string;
   phone: string;
 }
+
 const columns = [
   {
     key: "id",
@@ -35,30 +38,12 @@ const columns = [
   key: "phone",
   title: "Phone",
 }];
-const data: Client[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john@gmail.com",
-    phone: "123456",
-  },
-  {
-    id: "2",
-    name: "Jane Doe",
-    email: "",
-    phone: "654321",
-  },
-  {
-    id: "3",
-    name: "John Smith",
-    email: "",
-    phone: "",
-  },
-]
 
 export default function Clients() {
+  const { clients } = useLoaderData<typeof loader>();
+
   return <>
-      <Group align="end">
+      <Group align="center">
         <Select
           placeholder="Filter By"
           data={['Email']}
@@ -75,7 +60,7 @@ export default function Clients() {
 
       <CustomTable
         columns={columns}
-        data={data}
+        data={clients}
       >
         
       </CustomTable>
