@@ -4,6 +4,8 @@ import { Handle } from "~/utils/hook";
 import { useForm } from '@mantine/form';
 import { ActionFunctionArgs } from "@remix-run/node";
 import { notifications } from "@mantine/notifications";
+import { HttpClient } from "~/utils/http_client";
+import { Client, create_client, update_client } from "~/services/client";
 
 export const handle: Handle = {
   breadcrumb: (match: UIMatch) => {
@@ -15,35 +17,29 @@ export const action = async ({
   request
 }: ActionFunctionArgs) => {
   const formData = await request.formData();
-
-  await fetch('http://localhost:10000/api/user', {
-    method: 'POST',
-    body: JSON.stringify({
-      email: formData.get('email'),
-      name: formData.get('name'),
-      phone: formData.get('phone'),
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
+  
+  const req = await create_client({
+    first_name: formData.get('first_name'),
+    last_name: formData.get('last_name'),
+    email: formData.get('email'),
+  } as Client);
 
   return redirect("/dashboard/clients");
-} 
+}
 
 export default function ClientsNew() {
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
-      name: '',
+      first_name: '',
+      last_name: '',
       email: '',
-      phone: '',
     },
 
     validate: {
-      name: (value) => value.trim().length > 0 ? null : 'Name is required',
+      first_name: (value) => value.trim().length > 0 ? null : 'First name is required',
+      last_name: (value) => value.trim().length > 0 ? null : 'Last name is required',
       email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-      phone: (value) => (value.trim().length > 0 ? null : 'Phone is required'),
     },
   });
 
@@ -52,27 +48,26 @@ export default function ClientsNew() {
       <form method="post" action="/dashboard/clients/new">
         <TextInput
           withAsterisk
+          label="First name"
+          name="first_name"
+          key={form.key('first_name')}
+          
+          {...form.getInputProps('first_name')}
+        />
+        <TextInput
+          withAsterisk
+          label="Last name"
+          name="last_name"
+          key={form.key('last_name')}
+          {...form.getInputProps('last_name')}
+        />
+        <TextInput
+          withAsterisk
           label="Email"
           name="email"
           placeholder="your@email.com"
           key={form.key('email')}
           {...form.getInputProps('email')}
-        />
-        <TextInput
-          withAsterisk
-          label="Name"
-          name="name"
-          placeholder="John Doe"
-          key={form.key('name')}
-          {...form.getInputProps('name')}
-        />
-        <TextInput
-          withAsterisk
-          label="Phone"
-          name="phone"
-          placeholder="123456"
-          key={form.key('phone')}
-          {...form.getInputProps('phone')}
         />
         <Group justify="flex-end" mt="md">
           <Button type="submit">Submit</Button>

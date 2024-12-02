@@ -5,7 +5,8 @@ import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { UIMatch, useLoaderData } from "@remix-run/react";
 import React from "react";
 import { Handle } from "~/utils/hook";
-import { Client } from "../dashboard.clients._index/route";
+import { Client, delete_client, get_client, update_client } from "~/services/client";
+import { HttpClient } from "~/utils/http_client";
 
 export const handle: Handle = {
   breadcrumb: (match: UIMatch) => {
@@ -16,8 +17,8 @@ export const handle: Handle = {
 export const loader = async ({
   params
 }: LoaderFunctionArgs) => {
-  const client = await fetch(`http://localhost:10000/api/user/${params.id}`);
-  return { client: (await client.json()) as Client };
+  const client = await get_client(params.id as string);
+  return { client };
 }
 
 export const action = async ({
@@ -25,19 +26,20 @@ export const action = async ({
 }: ActionFunctionArgs) => {
   const formData = await request.formData();
 
-  await fetch(`http://localhost:10000/api/user/${formData.get('id')}`, {
-    method: 'PUT',
-    body: JSON.stringify({
-      email: formData.get('email'),
-      name: formData.get('name'),
-      phone: formData.get('phone'),
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  if (request.method === 'DELETE') {
+    const req = await delete_client(formData.get('id') as string);
 
-  return new Response(null, { status: 303, headers: { Location: '/dashboard/clients' } });
+    return new Response(null, { status: 200, headers: { Location: '/dashboard/clients' } });
+  }
+
+  const req = await update_client({
+    id: formData.get('id') as string,
+    first_name: formData.get('first_name') as string,
+    last_name: formData.get('last_name') as string,
+    email: formData.get('email') as string,
+  } as Client);
+
+  return new Response(null, { status: 200, headers: { Location: '/dashboard/clients' } });
 }
 
 export default function ClientId() {
@@ -48,15 +50,15 @@ export default function ClientId() {
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
-      name: client.name,
+      first_name: client.first_name,
+      last_name: client.last_name,
       email: client.email,
-      phone: client.phone,
     },
 
     validate: {
-      name: (value) => value.trim().length > 0 ? null : 'Name is required',
+      first_name: (value) => value.trim().length > 0 ? null : 'First name is required',
+      last_name: (value) => value.trim().length > 0 ? null : 'Last name is required',
       email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-      phone: (value) => (value.trim().length > 0 ? null : 'Phone is required'),
     },
   });
 
@@ -77,29 +79,26 @@ export default function ClientId() {
             <TextInput
               withAsterisk
               disabled={!isEditing}
+              label="First name"
+              name="first_name"
+              key={form.key('first_name')}
+              {...form.getInputProps('first_name')}
+            />
+            <TextInput
+              withAsterisk
+              disabled={!isEditing}
+              label="Last name"
+              name="last_name"
+              key={form.key('last_name')}
+              {...form.getInputProps('last_name')}
+            />
+            <TextInput
+              withAsterisk
+              disabled={!isEditing}
               label="Email"
               name="email"
-              placeholder="your@email.com"
               key={form.key('email')}
               {...form.getInputProps('email')}
-            />
-            <TextInput
-              withAsterisk
-              disabled={!isEditing}
-              label="Name"
-              name="name"
-              placeholder="John Doe"
-              key={form.key('name')}
-              {...form.getInputProps('name')}
-            />
-            <TextInput
-              withAsterisk
-              disabled={!isEditing}
-              label="Phone"
-              name="phone"
-              placeholder="123456"
-              key={form.key('phone')}
-              {...form.getInputProps('phone')}
             />
           </form>
         </Stack>
