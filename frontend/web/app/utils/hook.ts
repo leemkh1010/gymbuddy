@@ -1,5 +1,5 @@
-import { SerializeFrom } from "@remix-run/node";
-import { UIMatch, useMatches } from "@remix-run/react";
+import { SerializeFrom } from "react-router";
+import { UIMatch, useMatches } from "react-router";
 
 export type Handle = {
   breadcrumb?: (match: UIMatch) => React.ReactNode;

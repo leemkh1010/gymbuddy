@@ -8,11 +8,13 @@ type Column = {
 type CustomTableProps<T> = {
   columns: Column[];
   data: T[];
+  children: React.ReactNode;
 }
 
 export default function CustomTable<T>({
   columns,
   data,
+  children,
 }: CustomTableProps<T>) {
 
   return (
@@ -25,16 +27,7 @@ export default function CustomTable<T>({
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>
-        {data.map((row) => (
-          <Table.Tr>
-            {columns.map((column) => (
-              <Table.Td key={column.key}>
-                {/* @ts-ignore */}
-                {row[column.key]}
-              </Table.Td>
-            ))}
-          </Table.Tr>
-        ))}
+        {children}
       </Table.Tbody>
     </Table>
   );
