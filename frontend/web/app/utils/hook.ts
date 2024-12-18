@@ -1,4 +1,3 @@
-import { SerializeFrom } from "react-router";
 import { UIMatch, useMatches } from "react-router";
 
 export type Handle = {
