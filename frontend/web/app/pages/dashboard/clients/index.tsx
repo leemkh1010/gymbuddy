@@ -8,13 +8,6 @@ import { IconSearch } from "@tabler/icons-react";
 import { HttpClient } from "~/utils/http_client";
 import { Client, get_clients } from "~/services/client";
 import { PaginatedResponse } from "~/services/response";
-import { Handle } from "~/utils/hook";
-
-export const handle: Handle = {
-  breadcrumb: (match: UIMatch) => {
-    return <Anchor href={match.pathname}>Client</Anchor>;
-  }
-}
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const req = await get_clients();

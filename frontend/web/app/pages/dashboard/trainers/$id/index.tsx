@@ -1,12 +1,4 @@
-import { Anchor } from "@mantine/core";
-import { LoaderFunctionArgs, UIMatch } from "react-router";
-import { Handle } from "~/utils/hook";
-
-export const handle: Handle = {
-  breadcrumb: (match: UIMatch) => {
-    return <Anchor href={match.pathname}>{match.params.id}</Anchor>;
-  }
-}
+import { LoaderFunctionArgs } from "react-router";
 
 export default function Trainer({
   params

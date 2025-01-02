@@ -1,8 +1,7 @@
-import { ActionIcon, AppShell, Avatar, Breadcrumbs, Burger, Divider, Flex, Group, NavLink, Stack } from '@mantine/core';
+import { ActionIcon, AppShell, Avatar, Burger, Divider, Flex, Group, NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Outlet } from 'react-router';
 import { IconBell, IconSettings, IconTrain, IconUser, IconPhysotherapist } from '@tabler/icons-react';
-import { useCustomMatches } from '~/utils/hook';
 
 type Page = {
   title: string;
@@ -34,10 +33,6 @@ const footerPages: Page[] = [
 
 export default function Dashboard() {
   const [opened, { toggle }] = useDisclosure();
-  const matches = useCustomMatches<null>();
-  const links = matches.filter(
-    match => match.handle && match.handle.breadcrumb
-  ).map(match => match.handle.breadcrumb!(match));
 
   return (
     <AppShell
@@ -103,14 +98,7 @@ export default function Dashboard() {
       </AppShell.Navbar>
 
       <AppShell.Main>
-        <Stack gap="md">
-        <Group>
-          <Breadcrumbs separator="→" separatorMargin="md" mt="xs">
-            {links}
-          </Breadcrumbs>
-        </Group>
         <Outlet />
-      </Stack>
       </AppShell.Main>
     </AppShell>
   );
