@@ -9,6 +9,7 @@ import { Dropzone } from '@mantine/dropzone';
 import { useListState } from "@mantine/hooks";
 import { IconUpload, IconX, IconPhoto } from "@tabler/icons-react";
 import { useState } from "react";
+import { DateInput, DatePicker } from "@mantine/dates";
 
 export const handle: Handle = {
   breadcrumb: (match: UIMatch) => {
@@ -94,6 +95,12 @@ export default function ExercisesNew() {
             label="Trainer"
             data={Object.keys(CameraView).map((key) => ({ value: key, label: capitalise(key) }))}
           />
+          <DateInput 
+            label="Date"
+            clearable
+            defaultDate={new Date()}
+            description="Optional: Default to created time"
+          />
           <Dropzone
             onDrop={onDrop}
             accept={[
@@ -144,7 +151,7 @@ export default function ExercisesNew() {
             }) : null}
           </Stack>
           <Button disabled={
-            !videos.length
+            !videos.length || !!(videos.length && !videos.every((video) => video.done))
           } onClick={onCreateClick} type="submit">
             {!videos.length ? 'Please add video claps' : videos.every((video) => video.done) ? 'Create' : 'Upload Video'}
           </Button>
@@ -161,25 +168,29 @@ type VideoUploadProps = {
 };
 
 const VideoUpload = ({ index, video, setVideos }: VideoUploadProps) => {
+  console.log(video.file)
   return (
     <Stack gap="md">
       <Group align="center" justify="space-between">
-        <Text>{video.file.name}</Text>
-        <Select
-          label="Camera View"
-          data={Object.keys(CameraView).map((key) => ({ value: key, label: capitalise(key) }))}
-        />
-        <Button
-          onClick={() => setVideos.remove(index)}
-          variant="link"
-          color="red"
-        >
-          Remove
-        </Button>
+        <video width={320} height={240} controls>
+          <source src={URL.createObjectURL(video.file)} type={video.file.type} />
+        </video>
+        <Stack gap="md" justify="space-around">
+          <Text>{video.file.name}</Text>
+          <Select
+            label="Camera View"
+            data={Object.keys(CameraView).map((key) => ({ value: key, label: capitalise(key) }))}
+          />
+          <Button
+            onClick={() => setVideos.remove(index)}
+            variant="link"
+            color="red"
+          >
+            Remove
+          </Button>
+        </Stack>
       </Group>
-      <Stack>
-        <Progress value={video.uploadPercent} />
-      </Stack>
+      <Progress value={video.uploadPercent} />
     </Stack>
   )
 }

@@ -5,8 +5,6 @@ import {
   layout,
   prefix,
 } from "@react-router/dev/routes";
-// import { flatRoutes } from "@react-router";
-// import { remixRoutesOptionAdapter } from "@react-router/remix-routes-option-adapter";
 
 export default [
   // however your routes are defined
