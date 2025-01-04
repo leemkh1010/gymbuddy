@@ -21,6 +21,7 @@ pub struct ClientsByIdRow {
     pub updated_at: CqlTimestamp,
 }
 
+#[derive(DeserializeRow, Clone, Debug)]
 pub struct ClientsByEmailRow {
     pub client_id: String,
     pub email: String,
