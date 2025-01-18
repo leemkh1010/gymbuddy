@@ -10,7 +10,7 @@ from mediapipe.tasks.python.vision import (
 )
 from repo import CoreRepo, MongoCoreRepo
 from exercises import ExerciseType, Squat
-import numpy as np
+from storage import S3StorageProvider, StorageProvider
 import cv2 as cv
 from utils import Video, CameraView, EstimatorOutput, Estimator
 
@@ -21,7 +21,10 @@ root_path = os.path.dirname(os.path.abspath(__file__))
 
 class BlazePoseEstimator(Estimator, Video):
     _model_path: str
-    _connections: frozenset[(int, int)]
+    _excluded_index_list: frozenset[int] = frozenset(list(range(11)))
+    _connections = frozenset(
+        [(c.start, c.end) for c in PoseLandmarksConnections.POSE_LANDMARKS]
+    )
     _exercise_types = {ExerciseType.SQUAT: Squat()}
 
     def __init__(self, model_path: str):
@@ -30,10 +33,6 @@ class BlazePoseEstimator(Estimator, Video):
         self._options = PoseLandmarkerOptions(
             base_options=BaseOptions(model_asset_path=self._model_path),
             running_mode=RunningMode.IMAGE,
-        )
-
-        self._connections = frozenset(
-            [(c.start, c.end) for c in PoseLandmarksConnections.POSE_LANDMARKS]
         )
 
     def execute(
@@ -51,7 +50,7 @@ class BlazePoseEstimator(Estimator, Video):
                     raw_landmark_2d, video.camera_view
                 )
                 annotated_image = self.draw_landmark(
-                    frame, raw_landmark_2d, key_interest_points_2d
+                    frame, raw_landmark_2d, kips=key_interest_points_2d
                 )
                 yield EstimatorOutput(
                     idx, annotated_image, raw_landmark_2d, key_interest_points_2d
@@ -59,13 +58,12 @@ class BlazePoseEstimator(Estimator, Video):
 
 
 class PoseEstimationWorker:
-    _repo: CoreRepo
-    _estimator: Estimator
-    _logger: logging.Logger
-
-    def __init__(self, repo: CoreRepo, estimator: Estimator) -> None:
+    def __init__(
+        self, repo: CoreRepo, storage_provider: StorageProvider, estimator: Estimator
+    ) -> None:
         self._repo = repo
         self._estimator = estimator
+        self.storage_provider = storage_provider
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def postprocessing(self, result):
@@ -95,6 +93,7 @@ class PoseEstimationWorker:
 
         # TODO: Validate the schema
 
+        # TODO: Turn into a tmp path
         video_path = f"{root_path}/media/test.mp4"
 
         video = Video(video_path, CameraView.RIGHT)
@@ -116,12 +115,27 @@ class PoseEstimationWorker:
 
         new_video.release()
         # TODO: Upload the video to the cloud
+        self.storage_provider.upload_object(video_path, "videos/upload/processed.mp4")
+        os.remove(video_path)
         # TODO: Save the result to the database
         # TODO: Update the job status
 
 
 def main() -> None:
     logger = logging.getLogger(__name__)
+
+    try:
+        access_key = "RFbPRwd0jI499M1bi2S0"
+        secret_key = "dIefcszHPiUwLqf28U9XGAZs6WLLMLjQd3P1wCrl"
+        s3 = S3StorageProvider(
+            bucket="exercise-analyser",
+            access_key=access_key,
+            secret_key=secret_key,
+            endpoint_url="http://localhost:9000",
+        )
+    except Exception as e:
+        logger.fatal("pose detection worker init failed: ", e)
+        exit(1)
 
     try:
         db = "exercise_analyser"
@@ -140,7 +154,9 @@ def main() -> None:
         exit(1)
 
     try:
-        worker = PoseEstimationWorker(repo=repo, estimator=estimator)
+        worker = PoseEstimationWorker(
+            repo=repo, storage_provider=s3, estimator=estimator
+        )
     except Exception as e:
         logger.fatal("pose detection worker init failed: ", e)
         exit(1)
