@@ -3,15 +3,7 @@ from typing import Dict, NamedTuple, Tuple
 import numpy as np
 from enum import Enum
 
-from utils.video import CameraView
-
-
-class KeyInterestPoint2D(NamedTuple):
-    idx_to_coordinates: Dict[int, Tuple[int, int]]
-    angle: int
-    rotation_angle: int
-    comment: str
-    colour: Tuple[int, int, int]
+from utils import CameraView, KeyInterestPoint2D
 
 
 class ExerciseType(Enum):
