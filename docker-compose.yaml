@@ -6,6 +6,18 @@ services:
     networks:
       - exercise-analyzer
 
+  mongo:
+    image:  mongodb/mongodb-community-server:8.0.4-ubi9
+    ports:
+      - "27017:27017"
+    networks:
+      - exercise-analyzer
+    volumes:
+      - mongo-db:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=local
+
   cassandra:
     image: bitnami/cassandra:5.0.2
     ports:
@@ -42,7 +54,10 @@ services:
 volumes:
   minio:
     driver: local
+  mongo-db:
+    driver: local
   data:
+    driver: local
 
 
 networks:
