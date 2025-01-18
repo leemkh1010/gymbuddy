@@ -1,6 +1,6 @@
 use std::time::SystemTime;
 
-use super::{PaginatedResponse, SuccessResponse, ErrorResponse};
+use super::{ErrorResponse, PaginatedResponse, SuccessResponse};
 use crate::{
     databases::{Cassandra, CoreRepo},
     models::Client,

@@ -1,11 +1,13 @@
 mod clients;
 mod exercises;
+mod media;
 mod trainers;
 
 use serde::{Deserialize, Serialize};
 
 pub use self::clients::*;
 pub use self::exercises::*;
+pub use self::media::*;
 pub use self::trainers::*;
 
 #[derive(Debug, Serialize, Deserialize)]
