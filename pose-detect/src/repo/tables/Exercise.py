@@ -8,8 +8,9 @@ from exercises import ExerciseType
 
 
 class ExerciseTypeCodec(TypeCodec):
-    
-  
+    python_type = ExerciseType
+    bson_type = str
+
     def transform_python(self, value):
         return ExerciseType(value)
 
@@ -17,7 +18,7 @@ class ExerciseTypeCodec(TypeCodec):
         return value.value
 
 
-type_registry = TypeRegistry([ExerciseTypeCodec])
+type_registry = TypeRegistry([ExerciseTypeCodec()])
 codec_options = CodecOptions(type_registry=type_registry)
 
 

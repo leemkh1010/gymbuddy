@@ -16,6 +16,8 @@ from utils import Video, CameraView, EstimatorOutput, Estimator
 
 BaseOptions = mp.tasks.BaseOptions
 
+root_path = os.path.dirname(os.path.abspath(__file__))
+
 
 class BlazePoseEstimator(Estimator, Video):
     _model_path: str
@@ -93,7 +95,7 @@ class PoseEstimationWorker:
 
         # TODO: Validate the schema
 
-        video_path = "/Volumes/BACKUP/projects/test-projects/exercise-analyser/services/pose-detect/src/media/test.mp4"
+        video_path = f"{root_path}/media/test.mp4"
 
         video = Video(video_path, CameraView.RIGHT)
 
@@ -120,7 +122,6 @@ class PoseEstimationWorker:
 
 def main() -> None:
     logger = logging.getLogger(__name__)
-    root_path = os.path.dirname(os.path.abspath(__file__))
 
     try:
         db = "exercise_analyser"

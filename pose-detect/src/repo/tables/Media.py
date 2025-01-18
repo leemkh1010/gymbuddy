@@ -10,6 +10,9 @@ from utils.video import CameraView
 
 
 class CameraViewCodec(TypeCodec):
+    python_type = CameraView
+    bson_type = str
+
     def transform_python(self, value):
         return CameraView(value)
 
@@ -17,7 +20,7 @@ class CameraViewCodec(TypeCodec):
         return value.value
 
 
-type_registry = TypeRegistry([CameraViewCodec])
+type_registry = TypeRegistry([CameraViewCodec()])
 codec_options = CodecOptions(type_registry=type_registry)
 
 
