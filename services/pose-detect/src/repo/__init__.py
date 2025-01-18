@@ -1,5 +1,3 @@
-from . import cassandra
+from .tables import *
 from .Mongo import *
 from .MongoCoreRepo import *
-
-# __all__ = ["cassandra"]
