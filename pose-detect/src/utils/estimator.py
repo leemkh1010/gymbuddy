@@ -22,6 +22,7 @@ class EstimatorOutput(NamedTuple):
 
 class Estimator(ABC):
     _connections: frozenset[(int, int)]
+    _excluded_index_list: frozenset[int]
 
     def calculate_angle(self, a, b, c, outer=False):
         """
@@ -43,11 +44,11 @@ class Estimator(ABC):
 
     def draw_angle(
         self,
-        image,
-        angle,
+        image: np.ndarray,
+        angle: int,
         center=None,
-        rotation_angle=None,
-        label_text=None,
+        rotation_angle: int = None,
+        label_text: str = None,
         label_colour=None,
     ):
         if center and rotation_angle:
@@ -80,7 +81,7 @@ class Estimator(ABC):
         self,
         image: np.ndarray,
         landmarks,
-        angles: Dict[str, KeyInterestPoint2D],
+        kips: Dict[str, KeyInterestPoint2D],
         vis_threshold=0.6,
         presence_threshold=0.6,
     ):
@@ -103,6 +104,7 @@ class Estimator(ABC):
         idx_to_coordinates = {
             idx: landmark_to_coordinates(landmark)
             for idx, landmark in enumerate(landmarks)
+            if idx not in self._excluded_index_list
         }
 
         # Draw landmarks
@@ -111,6 +113,9 @@ class Estimator(ABC):
 
         # Draw connections
         for idx1, idx2 in self._connections:
+            if idx1 not in idx_to_coordinates or idx2 not in idx_to_coordinates:
+                continue
+
             cv.line(
                 annotated_image,
                 idx_to_coordinates[idx1],
@@ -119,7 +124,8 @@ class Estimator(ABC):
                 2,
             )
 
-        for key_interest_point in angles.values():
+        # TODO: find out why is not drawing the angle
+        for key_interest_point in kips.values():
             _, center, _ = key_interest_point.idx_to_coordinates.values()
             self.draw_angle(
                 annotated_image,
