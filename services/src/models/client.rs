@@ -1,28 +1,14 @@
+use bson::oid::ObjectId;
 use scylla::{frame::value::CqlTimestamp, DeserializeRow};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug, DeserializeRow)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Client {
-    pub id: String,
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+    pub id: Option<ObjectId>,
     pub first_name: String,
     pub last_name: String,
     pub email: String,
-    pub created_at: Option<i64>,
-    pub updated_at: Option<i64>,
-}
-
-#[derive(DeserializeRow, Clone, Debug)]
-pub struct ClientsByIdRow {
-    pub id: String,
-    pub first_name: String,
-    pub last_name: String,
-    pub email: String,
-    pub created_at: CqlTimestamp,
-    pub updated_at: CqlTimestamp,
-}
-
-#[derive(DeserializeRow, Clone, Debug)]
-pub struct ClientsByEmailRow {
-    pub client_id: String,
-    pub email: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
 }

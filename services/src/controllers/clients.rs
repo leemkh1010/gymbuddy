@@ -2,14 +2,16 @@ use std::time::SystemTime;
 
 use super::{ErrorResponse, PaginatedResponse, SuccessResponse};
 use crate::{
-    databases::{Cassandra, CoreRepo},
+    databases::{CoreRepo, MongoDB},
     models::Client,
 };
 use actix_web::{delete, get, http::StatusCode, post, put, web, HttpResponse, Responder};
+use aws_sdk_s3::types::Object;
+use bson::oid::ObjectId;
 use serde::Deserialize;
 
 #[get("")]
-pub async fn get_clients(db: web::Data<Cassandra>) -> impl Responder {
+pub async fn get_clients(db: web::Data<MongoDB>) -> impl Responder {
     let clients = db.get_clients(100).await.unwrap();
 
     let response = PaginatedResponse::<Client> {
@@ -23,7 +25,7 @@ pub async fn get_clients(db: web::Data<Cassandra>) -> impl Responder {
 }
 
 #[get["/{id}"]]
-pub async fn get_client(path: web::Path<String>, db: web::Data<Cassandra>) -> impl Responder {
+pub async fn get_client(path: web::Path<String>, db: web::Data<MongoDB>) -> impl Responder {
     let id = path.into_inner();
 
     let client = db.get_client_by_id(&id).await;
@@ -49,7 +51,7 @@ struct CreateClientRequest {
 
 #[post("")]
 pub async fn create_client(
-    db: web::Data<Cassandra>,
+    db: web::Data<MongoDB>,
     req: web::Json<CreateClientRequest>,
 ) -> impl Responder {
     let time = SystemTime::now()
@@ -76,12 +78,12 @@ pub async fn create_client(
     }
 
     let client = Client {
-        id: ulid::Ulid::new().to_string(),
+        id: Some(ObjectId::new()),
         first_name: req.first_name.clone(),
         last_name: req.last_name.clone(),
         email: req.email.clone(),
-        created_at: Some(time),
-        updated_at: Some(time),
+        created_at: chrono::Utc::now(),
+        updated_at: chrono::Utc::now(),
     };
 
     db.create_client(&client).await.unwrap();
@@ -102,7 +104,7 @@ struct UpdateClientRequest {
 #[put["/{id}"]]
 pub async fn update_client(
     path: web::Path<String>,
-    db: web::Data<Cassandra>,
+    db: web::Data<MongoDB>,
     req: web::Json<UpdateClientRequest>,
 ) -> impl Responder {
     let id = path.into_inner();
@@ -119,17 +121,12 @@ pub async fn update_client(
     let old_client = old_client.unwrap();
 
     let new_client = Client {
-        id: old_client.id.clone(),
+        id: old_client.id,
         first_name: req.first_name.clone(),
         last_name: req.last_name.clone(),
         email: req.email.clone(),
         created_at: old_client.created_at,
-        updated_at: Some(
-            SystemTime::now()
-                .duration_since(SystemTime::UNIX_EPOCH)
-                .unwrap()
-                .as_millis() as i64,
-        ),
+        updated_at: chrono::Utc::now(),
     };
 
     db.update_client(&new_client).await.unwrap();

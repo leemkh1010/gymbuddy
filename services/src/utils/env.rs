@@ -7,6 +7,7 @@ use std::fmt::Debug;
 
 #[derive(Debug)]
 pub struct ENV {
+    db_schema: String,
     db_host: String,
     db_port: u16,
     db_user: String,
@@ -29,6 +30,7 @@ impl ENV {
         }
 
         ENV {
+            db_schema: Self::get_env("DB_SCHEMA", "mongodb"),
             db_host: Self::get_env("DB_HOST", "localhost"),
             db_port: Self::parse_port(Self::get_env("DB_PORT", "9042")),
             db_user: Self::get_env("DB_USER", "admin"),
@@ -43,24 +45,20 @@ impl ENV {
         }
     }
 
-    pub fn get_db_host(&self) -> &String {
-        &self.db_host
+    pub fn get_db_name(&self) -> String {
+        self.db_name.clone()
     }
 
-    pub fn get_db_port(&self) -> u16 {
-        self.db_port
-    }
-
-    pub fn get_db_user(&self) -> &String {
-        &self.db_user
-    }
-
-    pub fn get_db_password(&self) -> &String {
-        &self.db_password
-    }
-
-    pub fn get_db_name(&self) -> &String {
-        &self.db_name
+    pub fn get_db_conn_string(&self) -> String {
+        format!(
+            "{}://{}:{}@{}:{}/{}",
+            self.db_schema,
+            self.db_user,
+            self.db_password,
+            self.db_host,
+            self.db_port,
+            self.db_name
+        )
     }
 
     pub fn get_media_endpoint(&self) -> Option<&String> {

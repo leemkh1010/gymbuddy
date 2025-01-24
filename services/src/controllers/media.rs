@@ -14,6 +14,7 @@ use super::{ErrorResponse, SuccessResponse};
 struct CreateRemoteUploadRequest {
     file_name: String,
     content_type: String,
+    size: i64,
 }
 
 #[derive(Debug, Serialize)]

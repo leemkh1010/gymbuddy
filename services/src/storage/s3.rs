@@ -11,9 +11,10 @@ use aws_sdk_s3::{
     Client,
 };
 
-use super::Storage;
+use super::{ObjectStorageReference, Storage};
 
 pub struct S3 {
+    schema: String,
     bucket: String,
     client: Box<Client>,
 }
@@ -49,6 +50,7 @@ impl S3 {
         }
 
         S3 {
+            schema: "s3".to_string(),
             bucket: env.get_media_bucket().clone(),
             client: Box::new(client),
         }
@@ -60,6 +62,10 @@ impl S3 {
 }
 
 impl Storage for S3 {
+    fn to_object_storage_reference(&self, key: String) -> ObjectStorageReference {
+        ObjectStorageReference::new(self.schema.clone(), self.bucket.clone(), key)
+    }
+
     async fn sign_get_public_url(&self, key: &str, expires_in: u64) -> Result<String> {
         let client = self.get_client();
 
@@ -97,7 +103,7 @@ impl Storage for S3 {
         match presigned {
             Ok(url) => Ok(url.uri().to_string()),
             Err(e) => match e.into_service_error() {
-                PutObjectError::InvalidRequest(_) => Err(anyhow!("invalid request")),
+                // PutObjectError::InvalidRequest(_) => Err(anyhow!("invalid request")),
                 _ => Err(anyhow!("error signing put object url")),
             },
         }

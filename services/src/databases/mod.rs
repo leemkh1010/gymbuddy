@@ -1,7 +1,7 @@
 mod base_client;
-mod cassandra;
+mod mongo;
 mod redis;
 
 pub use base_client::*;
-pub use cassandra::*;
+pub use mongo::*;
 pub use redis::*;

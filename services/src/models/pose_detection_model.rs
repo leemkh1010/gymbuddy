@@ -1,3 +1,4 @@
+use anyhow::{Error, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -8,30 +9,17 @@ struct DetectionModel {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum PoseDetectionModel {
-    MediaPipeBlasePoseLite(DetectionModel),
-    MediaPipeBlasePoseFull(DetectionModel),
-    MediaPipeBlasePoseHeavy(DetectionModel),
+    MediaPipeBlasePoseLite,
+    MediaPipeBlasePoseFull,
+    MediaPipeBlasePoseHeavy,
 }
 
 impl PoseDetectionModel {
-    pub fn from_string(s: &str) -> Result<PoseDetectionModel, String> {
-        match s {
-            "MediaPipeBlasePoseLite" => {
-                Ok(PoseDetectionModel::MediaPipeBlasePoseLite(DetectionModel {
-                    name: "MediaPipeBlasePoseLite".to_string(),
-                }))
-            }
-            "MediaPipeBlasePoseFull" => {
-                Ok(PoseDetectionModel::MediaPipeBlasePoseFull(DetectionModel {
-                    name: "MediaPipeBlasePoseFull".to_string(),
-                }))
-            }
-            "MediaPipeBlasePoseHeavy" => Ok(PoseDetectionModel::MediaPipeBlasePoseHeavy(
-                DetectionModel {
-                    name: "MediaPipeBlasePoseHeavy".to_string(),
-                },
-            )),
-            _ => Err(format!("Invalid PoseDetectionModel: {}", s)),
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            PoseDetectionModel::MediaPipeBlasePoseLite => "MEDIAPIPE_BLASE_POSE_LITE",
+            PoseDetectionModel::MediaPipeBlasePoseFull => "MEDIAPIPE_BLASE_POSE_FULL",
+            PoseDetectionModel::MediaPipeBlasePoseHeavy => "MEDIAPIPE_BLASE_POSE_HEAVY",
         }
     }
 }
